@@ -1,4 +1,6 @@
-let startScreen;
+let startScreenImage;
+let startGame = true;
+let backgroundImage;
 let exitBackground;
 let tuxImage;
 let logos = []; // array of existing logo elements on screen
@@ -14,7 +16,6 @@ let ubuntu;
 let opensuse;
 let windows;
 let tux;
-let score = 0 ; 
 
 
 function preload() {
@@ -28,32 +29,40 @@ function preload() {
   opensuse = loadImage('assets/opensuse.png');
   windows = loadImage('assets/windows.png');
   tuxImage = loadImage('assets/tux.png');
+  backgroundImage = loadImage('assets/matrix.png');
+  startScreenImage = loadImage('assets/startScreen.jpg');
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
-  tux = new Tux(tuxImage, windowWidth * 0.5, windowHeight * 0.8);
+  createCanvas(800, 600);
+  //tux = new Tux(tuxImage, windowWidth * 0.5, windowHeight * 0.8);
+  tux = new Tux(tuxImage, width * 0.5, height * 0.8);
 
   types.push(arch, fedora, gentoo, openbsd, redhat, ubuntu, opensuse);
 }
 
 function draw() {
-  background(255);
+  imageMode(CENTER);
+  image(backgroundImage, width / 2, height / 2, width, height);
   fill(120);
-  rect(0, windowHeight - windowHeight * 0.1, windowWidth, windowHeight * 0.1);
+  //rect(0, windowHeight - windowHeight * 0.1, windowWidth, windowHeight * 0.1);
+  rect(0, height - height * 0.1, width, height * 0.1);
   // changed from rect(0, windowWidth * 0.9, windowWidth, windowHeight * 0.1);
-
+  updateHud();
   updatePosition();
   detectKeys();
   detectCollision();
-  updateHud();
+
+  if (startGame === true) {
+    startScreen();
+  }
 
   // 1% chance of a logo being spawned every frame
   if (Math.floor(Math.random() * 100) === 90) {
     dropLogo();
   }
 
-  if (Math.floor(Math.random() * 1000 > 94)) {
+  if (Math.floor(Math.random() * 1000 > 995)) {
     dropWindows();
   }
 
@@ -62,27 +71,35 @@ function draw() {
 
 function dropLogo() {
   //logo = new Logo(5, types[Math.floor(Math.random() * types.length)]);
-  logo = new Logo(40, random(types)); // uses the p5 random function which is easier to read, in this case it takes the array name as the input and returns a random item from the array
+  logo = new Logo(30, random(types)); // uses the p5 random function which is easier to read, in this case it takes the array name as the input and returns a random item from the array
   console.log("Logo Spawned");
   logo.fall();
   logos.push(logo);
 }
 
 function dropWindows() {
-  windowsLogo = new Logo(20, windows);
+  windowsLogo = new Logo(60, windows);
   console.log("Windows Spawned");
   windowsLogo.fall();
   windowsElements.push(windowsLogo);
 }
 
+function updateHud() {
+  fill(255);
+  textSize(20);
+  text("Caught: " + tux.points, 10, 30);
+  text("Missed: " + tux.itemsMissed, width - 120, 30);
+}
 /*
 function startScreen() {
   image(? , windowWidth, windowHeight)
+  
 }
 */
 
 function quitGame() {
-  image(exitBackground, windowWidth, windowHeight);
+  //image(exitBackground, windowWidth, windowHeight);
+  image(exitBackground, width, height);
 }
 
 function detectKeys() {
@@ -90,6 +107,14 @@ function detectKeys() {
     tux.x = tux.x - 10;
   } else if (keyIsDown(68) || keyIsDown(RIGHT_ARROW)) {
     tux.x = tux.x + 10;
+  }
+}
+
+function keyPressed() {
+  if (keyCode === 32 && startGame === true) {
+    startGame = false;
+    print("startGame: " + startGame);
+    loop();
   }
 }
 
@@ -101,15 +126,8 @@ function detectCollision() {
       console.log("Collision detected, X diff: " + abs(tux.x - logos[i].x) + ", Y diff: " + abs(tux.y - logos[i].y));
       tux.points += 1;
       tux.itemsCaught += 1;
-      score += 1; 
       logos.splice(i, 1);
     }
-  }
-
-  function updateHud() {
-    fill(0);
-    text = ("Caught:", score, 10, 30); 
-
   }
 
   // needs updating to dist() collision system, maybe this could be merged into the original loop?
@@ -122,13 +140,16 @@ function detectCollision() {
   }
 }
 
+
 function updatePosition() {
   //redraws tux at current coordinates
   tux.makeImage();
-  tux.updateY(windowHeight * 0.85);
+  tux.updateY(height * 0.85);
 
-  if (tux.x > windowWidth - 45) {
-    tux.x = windowWidth - 45;
+  //if (tux.x > windowWidth - 45) {
+  if (tux.x > width - 45) {
+    //tux.x = windowWidth - 45;
+    tux.x = width - 45;
   } else if (tux.x < 30) {
     tux.x = 30;
   }
@@ -136,7 +157,8 @@ function updatePosition() {
   // iterate through logos array and make each item fall
   for (let i = 0; i < logos.length; i++) {
     logos[i].fall();
-    if (logos[i].y < windowHeight - windowHeight * 0.1) {
+    //if (logos[i].y < windowHeight - windowHeight * 0.1) {
+    if (logos[i].y < height - height * 0.1) {
       logos[i].y = logos[i].y + 1;
     } else {
       tux.itemsMissed += 1;
@@ -146,7 +168,8 @@ function updatePosition() {
 
   for (let i = 0; i < windowsElements.length; i++) {
     windowsElements[i].fall();
-    if (windowsElements[i].y < windowHeight - windowHeight * 0.1) {
+    //if (windowsElements[i].y < windowHeight - windowHeight * 0.1) {
+    if (windowsElements[i].y < height - height * 0.1) {
       windowsElements[i].y = windowsElements[i].y + 1;
     } else {
       windowsElements.splice(i, 1);

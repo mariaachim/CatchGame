@@ -3,7 +3,7 @@ class Logo {
     // width, height, point, frequency can all be obtained using a switch case of the type
     this.radius = radius; // tmp, might be merged into switch-case
     this.image = image; // if type is switched to number based system this needs to be modified and moved into the switch-case
-    this.x = Math.random() * (window.innerWidth - 100);
+    this.x = random(width);
     this.y = -50;
     //this.radius = this.image.width  / 2;
     switch (image) {
@@ -22,13 +22,15 @@ class Logo {
         this.frequency = 0.55;
         this.velocity = 30;
         break;
-      //case windows:
-        //break;
+      case windows:
+        this.points = -1;
+        this.velocity = 40;
+        break;
     }
   }
 
   fall() {
     imageMode(CENTER); 
-    image(this.image, this.x, this.y, 100, 100); // implement radius
+    image(this.image, this.x, this.y, this.radius * 2, this.radius * 2);
   }
 }
